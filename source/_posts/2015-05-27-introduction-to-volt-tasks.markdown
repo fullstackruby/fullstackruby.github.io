@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Introduction to Volt Tasks"
-date: 2015-05-27 12:20:08 -0700
+date: 2015-05-27 10:20:08 -0700
 comments: true
 categories: ruby, volt
 ---
