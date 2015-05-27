@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Introduction to Volt Tasks - Full Stack Ruby</title>
+  <meta name="author" content="Collective">
+
+  
+  <meta name="description" content="Screencast - @rickcarlino Asciicast - @ybur-yug Volt Tasks - An Introduction Getting Started First, let&rsquo;s get a basic application set up. I &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Full Stack Ruby" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Full Stack Ruby</a></h1>
+  
+    <h2>Ruby All The Way.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="fullstackruby.github.io" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Introduction to Volt Tasks</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-27T21:20:08+02:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>9:20 pm</span></time>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>Screencast - <a href="http://www.github.com/rickcarlino">@rickcarlino</a></h1>
+
+<iframe width="500" height="280" src="https://www.youtube.com/embed/th0UKrSFdo0" frameborder="0" allowfullscreen></iframe>
+
+
+<h1>Asciicast - <a href="http://www.github.com/yburyug">@ybur-yug</a></h1>
+
+<!-- more -->
+
+
+<h1>Volt Tasks - An Introduction</h1>
+
+<h2>Getting Started</h2>
+
+<p>First, let&rsquo;s get a basic application set up. I will assume you&rsquo;ve already dug around a simple project, but if you
+are completely new to Volt I would recommend reading through the documentation <a href="http://docs.voltframework.com">here</a>.
+We create a project with a simple</p>
+
+<p><code>volt new project_name</code></p>
+
+<p>And it will bundle automatically. However, if you prefer to bundle to a local path like I do using:</p>
+
+<p><code>bundle --path vendor/bundle</code></p>
+
+<p>This is what you should see after creating your first application:</p>
+
+<p><img src="http://i.imgur.com/ujb4F0E.gif" alt="step 1" /></p>
+
+<p>Now that we have a project, we can fire up our server and have the application start to run. One of the best things about
+development in Volt is the server will automatically reload your new code. So, start a server in a separate terminal and
+proceed to generate a task now.</p>
+
+<p>(in a new terminal)
+<code>bundle exec volt s</code></p>
+
+<p>(in the original)
+<code>bundle exec volt g task stat</code></p>
+
+<p>Now, let&rsquo;s see what that gets us:</p>
+
+<p><img src="http://i.imgur.com/8r3VaJQ.gif" alt="step 2" /></p>
+
+<p>So we have a Volt task, and the relevent spec. Let&rsquo;s open up the default task file and check it out:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="k">class</span> <span class="nc">StatTask</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Task</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, lets add some code to get information from the backend using this task we have generated. Volt tasks exclusively run
+asynchronously on the backend.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show_stats</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="ss">ruby_version</span><span class="p">:</span>     <span class="no">RUBY_VERSION</span><span class="p">,</span> <span class="c1"># note that these are constants always available in Ruby</span>
+</span><span class='line'>      <span class="ss">ruby_description</span><span class="p">:</span> <span class="no">RUBY_DESCRIPTION</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">ruby_platform</span><span class="p">:</span>    <span class="no">RUBY_PLATFORM</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/stat_task.rb#L2">Source</a></h5>
+
+<p>Now, this method is an instance level method. However, to call it in our controller Volt has a slightly different convention
+than the norm when it comes to invoking this. It is also worth noting that even though we are writing it as a Ruby hash, it
+will be coerced into a Volt model on the frontend. This becomes an important detail</p>
+
+<p>If we navigate to our controller, we can begin to handle the output from this.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="k">module</span> <span class="nn">Main</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">MainController</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">ModelController</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>      <span class="no">StatTask</span><span class="o">.</span><span class="n">show_stats</span>
+</span><span class='line'>      <span class="o">.</span><span class="n">then</span> <span class="k">do</span> <span class="o">|</span><span class="n">stats</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">stats</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">fail</span> <span class="k">do</span> <span class="o">|</span><span class="n">error</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">error</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
+
+<p>Now if we go to our client code in <code>app/main/views/main/index.html</code>, we have created a <code>page._info</code> Volt model we can access these parameters from. Not that is is accessed with a <code>_</code> prepended. This is another Volt convention.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;</span><span class="no">Ruby</span> <span class="no">Description</span><span class="o">&lt;</span><span class="sr">/h2&gt;</span>
+</span><span class='line'><span class="sr">    </span>
+</span><span class='line'><span class="sr">  &lt;h2&gt;Ruby Version&lt;/</span><span class="n">h2</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="p"></span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;</span><span class="no">Ruby</span> <span class="no">Platform</span><span class="o">&lt;</span><span class="sr">/h2&gt;</span>
+</span><span class='line'><span class="sr">    </span>
+</span><span class='line'><span class="sr"> ...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
+
+<h2>Going Further</h2>
+
+<p>Let&rsquo;s say we had a simple API we could hit and wanted to grab some data. As an example, I have created <a href="https://quiet-temple-1623.herokuapp.com/frontpage/1">this</a>.
+It is a simple wrapper for <a href="http://lobste.rs">Lobste.rs</a> that returns some JSON of the top stories in a <code>results</code>
+key. Using another Task we can mirror the frontpage of the site hitting this API. First, we need to add Mechanize
+to our Gemfile to easily get web responses.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;mechanize&#39;</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/Gemfile#L31">Source</a></h5>
+
+<p><code>bundle install</code> and we are ready to get going if we generate another task.</p>
+
+<p><code>volt generate task lobsters</code></p>
+
+<p>This will create our task just like last time and we can open it.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="nb">require</span> <span class="s1">&#39;json&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mechanize&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">lobsters</span>
+</span><span class='line'>    <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">Mechanize</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;https://quiet-temple-1623.herokuapp.com/frontpage/1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/lobster_task.rb">Source</a></h5>
+
+<p>Now we just go into our <code>index.html</code> for <code>main</code> and we can add some logic to display our stories.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="p"></span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h4</span><span class="o">&gt;&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="p"></span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="n">h4</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="p"></span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
+
+<p>And match that up with the <code>index</code> method on our controller:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>      <span class="no">LobstersTask</span><span class="o">.</span><span class="n">lobsters</span>
+</span><span class='line'>      <span class="o">.</span><span class="n">then</span> <span class="k">do</span> <span class="o">|</span><span class="n">stories</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_stories</span> <span class="o">=</span> <span class="n">stories</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">fail</span> <span class="k">do</span> <span class="o">|</span><span class="n">err</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_stories</span> <span class="o">=</span> <span class="n">err</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
+
+<p>And now we&rsquo;ve successfully executed code on only the server, and fed it to the client once the task was completed
+communicating both with 3rd party API&rsquo;s and our own server.</p>
+
+<h5><a href="http://young-harbor-8245.herokuapp.com/">Here</a> is a deployed version of the final app.</h5>
+
+<p>Happy Hacking.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    Collective
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-05-27T21:20:08+02:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>9:20 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby,</a>, <a class='category' href='/blog/categories/volt/'>volt</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks/" data-via="" data-counturl="http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/05/27/a-volt-chat-application-in-ten-minutes/" title="Previous Post: A Volt Chat Application in Ten Minutes">&laquo; A Volt Chat Application in Ten Minutes</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/05/27/ruby-and-ocr/" title="Next Post: Ruby &amp; OCR">Ruby &amp; OCR &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Collective -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

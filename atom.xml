@@ -4,7 +4,7 @@
   <title><![CDATA[Full Stack Ruby]]></title>
   <link href="http://fullstackruby.github.io/atom.xml" rel="self"/>
   <link href="http://fullstackruby.github.io/"/>
-  <updated>2015-05-28T00:13:45+02:00</updated>
+  <updated>2015-05-28T00:15:58+02:00</updated>
   <id>http://fullstackruby.github.io/</id>
   <author>
     <name><![CDATA[Collective]]></name>
@@ -12,5 +12,1032 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby &amp; OCR]]></title>
+    <link href="http://fullstackruby.github.io/blog/2015/05/27/ruby-and-ocr/"/>
+    <updated>2015-05-27T21:45:41+02:00</updated>
+    <id>http://fullstackruby.github.io/blog/2015/05/27/ruby-and-ocr</id>
+    <content type="html"><![CDATA[<h4>(Adapted from <a href="http://www.github.com/ybur-yug">@yburyug&rsquo;s</a> original Python guide)</h4>
+
+<h2>Why?</h2>
+
+<p>A) Obviously it just sounds fun as shit.</p>
+
+<p>B) Real world use. I mean, we do have to go paperless somehow right?
+OCR has become common. With the advent of libraries such as Tesseract, Ocrad, and more people
+have built hundreds of bots and libraries that use them in interesting ways. A trivial example is Meme Reading
+bots on Reddit. Extracting text from images on sites like Tumblr or Pinterest that have overlay text commonly
+also can be used in order to further add natural language analysis data into models to predict it.</p>
+
+<!-- more -->
+
+
+<h2>Beginning steps</h2>
+
+<p>There are two potential options for building this in the simplest scale. We will go through building the server
+layer here as a simple means to have an API resource we can hit from a frontend framework in order to make
+and application based around this. The other is to generate the HTML serverside. We will take the former approach.</p>
+
+<p>First, we have to install some dependencies. As always, configuring your environment is 90% of the fun.</p>
+
+<blockquote><p>This post has been tested on Ubuntu version 14.04 but it should work for 12.x and 13.x versions as well. If you&rsquo;re running OSX, you can use <a href="http://osxdaily.com/2012/03/27/install-run-ubuntu-linux-virtualbox/">VirtualBox</a> or a droplet on <a href="https://www.digitalocean.com/">DigitalOcean</a> (recommended!) to create the appropriate environment.</p></blockquote>
+
+<h3>Downloading dependencies</h3>
+
+<p>We need <a href="http://en.wikipedia.org/wiki/Tesseract_%28software%29">Tesseract</a> and all of its dependencies, which includes <a href="http://www.leptonica.com/">Leptonica</a>, as well as some other packages that power these two for sanity checks to start. Now, I could just give you a list of magic commands that I know work in the env. But, lets explain things a bit first.</p>
+
+<blockquote><p>NOTE: You can also use the <a href="link">_run.sh</a> shell script to quickly install the dependencies along with Leptonica and Tesseract and the relevant English language packages. If you go this route, skip down to the <a href="link">Web-server time!</a> section. But please consider manually building these libraries if you have not before. It is chicken soup for the hacker&rsquo;s soul to play with tarballs and make. However, first are our regular apt-get dependencies (before we get fancy).</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get update
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install autoconf automake libtool
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install libpng12-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install libjpeg62-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install g++
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install libtiff4-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install libopencv-dev libtesseract-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install git
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install cmake
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install build-essential
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install libleptonica-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install liblog4cplus-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install libcurl3-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install python2.7-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get install tk8.5 tcl8.5 tk8.5-dev tcl8.5-dev
+</span><span class='line'><span class="nv">$ </span>sudo apt-get build-dep python-imaging --fix-missing
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We run <code>sudo apt-get update</code> is short for &lsquo;make sure we have the latest package listings.
+<code>g++</code> is the GNU compiled collection.
+We also get a bunch of libraries that allow us to toy with images. ie <code>libtiff</code> <code>libpng</code> etc.
+We also get <code>git</code>, which if you lack famliiarity with but have found yourself here, you may want to read <a href="link">The Git Book</a>.
+Beyond this, we also ensure we have <code>Python 2.7</code>, our programming language of choice.
+We then get the <code>python-imaging</code> library set up for interaction with all these pieces.</p>
+
+<p>Speaking of images: now, we&rsquo;ll need <a href="http://www.imagemagick.org/">ImageMagick</a> as well if we want to toy with images
+before we throw them in programmatically, now that we have all the libraries needed to understand and parse them in..</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>sudo apt-get install imagemagick
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Building Leptonica</h3>
+
+<p>Now, time for Leptonica, finally! (Unless you ran the shell scripts and for some reason are seeing this. In which case proceed to the <a href="link">Webserver Time!</a> section.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span>wget http://www.leptonica.org/source/leptonica-1.70.tar.gz
+</span><span class='line'><span class="nv">$ </span>tar -zxvf leptonica-1.70.tar.gz
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>leptonica-1.70/
+</span><span class='line'><span class="nv">$ </span>./autobuild
+</span><span class='line'><span class="nv">$ </span>./configure
+</span><span class='line'><span class="nv">$ </span>make
+</span><span class='line'><span class="nv">$ </span>sudo make install
+</span><span class='line'><span class="nv">$ </span>sudo ldconfig
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If this is your first time playing with tar, heres what we are doing:</p>
+
+<ul>
+<li>get the binary for Leptonica (<code>wget</code>)</li>
+<li>unzip the tarball  and  (<code>x</code> for extract, <code>v</code> for verbose&hellip;etc. For a detailed explanation: <code>man tar</code>)</li>
+<li><code>cd</code> into our new unpacked directory</li>
+<li>run <code>autobuild</code> and <code>configure</code> bash scripts to set up the application</li>
+<li>use <code>make</code> to build it</li>
+<li>install it with <code>make</code> after the build</li>
+<li>create necessary links with <code>ldconfig</code></li>
+</ul>
+
+
+<p>Boom, now we have Leptonica. On to Tesseract!</p>
+
+<h3>Building Tesseract</h3>
+
+<p>And now to download and build Tesseract&hellip;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ..
+</span><span class='line'><span class="nv">$ </span>wget https://tesseract-ocr.googlecode.com/files/tesseract-ocr-3.02.02.tar.gz
+</span><span class='line'><span class="nv">$ </span>tar -zxvf tesseract-ocr-3.02.02.tar.gz
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd </span>tesseract-ocr/
+</span><span class='line'><span class="nv">$ </span>./autogen.sh
+</span><span class='line'><span class="nv">$ </span>./configure
+</span><span class='line'><span class="nv">$ </span>make
+</span><span class='line'><span class="nv">$ </span>sudo make install
+</span><span class='line'><span class="nv">$ </span>sudo ldconfig
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The process here mirrors the Leptonica one almost perfectly. So for explanation, I&rsquo;ll keep this DRY and just say see above.</p>
+
+<p>We need to set up an environment variable to source our Tesseract data, so we&rsquo;ll take care of that now:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">export </span><span class="nv">TESSDATA_PREFIX</span><span class="o">=</span>/usr/local/share/
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, lets get the Tesseract english language packages that are relevant:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="nv">$ </span><span class="nb">cd</span> ..
+</span><span class='line'><span class="nv">$ </span>wget https://tesseract-ocr.googlecode.com/files/tesseract-ocr-3.02.eng.tar.gz
+</span><span class='line'><span class="nv">$ </span>tar -xf tesseract-ocr-3.02.eng.tar.gz
+</span><span class='line'><span class="nv">$ </span>sudo cp -r tesseract-ocr/tessdata <span class="nv">$TESSDATA_PREFIX</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>BOOM! We now have Tesseract. We can use the CLI. Feel free to read the <a href="https://code.google.com/p/tesseract-ocr/">docs</a> if you want to play. However, we need a Python wrapper to truly achieve our end goal. So the next step is setting
+up a Flask server that will allow us to easily build an API that we will POST requests to with a link to an image, and it will run the character recognition on them.</p>
+
+<h2>Web-server time!</h2>
+
+<p>Now, on to the fun stuff. First, we will need to build a way to interface with Tesseract via Ruby. We COULD use <code>popen</code>
+but that just is wrong. The prolific <a href="gh%20link">Meh</a> has created a very robust Ruby wrapper for tesseract that we will
+be utilizing for this. It has the most features of any wrapper that I have found thus far, and is a joy to use. In this
+initial guide we will go over simply using its basic API, but will dive in further in a later post.</p>
+
+<p>Building this server shouldn&rsquo;t be much of a challenge, but let&rsquo;s assume you might have never had to do so before. I prefer
+to use <a href="http://www.sinatrarb.com">Sinatra</a> for simple API&rsquo;s like this one. Since we have a blank slate, we may as well take
+the TDD approach.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>mkdir ocr_api
+</span><span class='line'><span class="nb">cd </span>ocr_api
+</span><span class='line'>mkdir lib spec
+</span><span class='line'>touch spec/integration_spec.rb
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, run</p>
+
+<p><code>bundle init</code></p>
+
+<p>so we have a Gemfile, and we can open that up with</p>
+
+<p><code>vim Gemfile</code></p>
+
+<p>(I use vim, but replace that with any editor of your choice&rsquo;s unix command)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;sinatra&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;tesseract-ocr&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;pry&#39;</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;rspec&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>and now in <code>integration_spec.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rack/test&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;rspec&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;./lib/server&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span> <span class="s1">&#39;../../my-app.rb&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;RACK_ENV&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="s1">&#39;test&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">RSpecMixin</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Test</span><span class="o">::</span><span class="no">Methods</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">app</span><span class="p">()</span> <span class="no">Sinatra</span><span class="o">::</span><span class="no">Application</span> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="n">c</span><span class="o">.</span><span class="n">include</span> <span class="no">RSpecMixin</span> <span class="p">}</span>
+</span><span class='line'><span class="no">Spec</span><span class="o">::</span><span class="no">Runner</span><span class="o">.</span><span class="n">configure</span> <span class="p">{</span> <span class="o">|</span><span class="n">c</span><span class="o">|</span> <span class="n">c</span><span class="o">.</span><span class="n">include</span> <span class="no">RSpecMixin</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># The above gets our rack env set up for sinatra testing</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="s2">&quot;Our Sinatra App&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;should allow access to the root route&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">get</span> <span class="s2">&quot;/&quot;</span>
+</span><span class='line'>    <span class="n">last_response</span><span class="o">.</span><span class="n">should</span> <span class="n">be_ok</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>now we can actually make a file to pass this test&hellip;</p>
+
+<p><code>vim lib/server.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sinatra&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">get</span> <span class="s2">&quot;/&quot;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="s2">&quot;hello world&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, let&rsquo;s create a simple class to get our image and get text for it.</p>
+
+<p><code>lib/server.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;open-uri&#39;</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">OcrEngine</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
+</span><span class='line'>    <span class="vi">@engine</span> <span class="o">=</span> <span class="no">Tesseract</span><span class="o">::</span><span class="no">Engine</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">e</span><span class="o">|</span> <span class="n">e</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="ss">:eng</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parse_image</span> <span class="n">url</span>
+</span><span class='line'>    <span class="vi">@engine</span><span class="o">.</span><span class="n">text_for</span><span class="p">(</span><span class="n">get_image</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">get_image</span> <span class="n">img_url</span>
+</span><span class='line'>    <span class="nb">open</span><span class="p">(</span><span class="n">img_url</span><span class="p">)</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And now if we define our route to take a POST request instead of a GET request:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">params</span><span class="o">[</span><span class="s1">&#39;image_url&#39;</span><span class="o">]</span>
+</span><span class='line'>    <span class="no">OcrEngine</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">parse_image</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="s1">&#39;image_url&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="s2">&quot;Please supply an `image_url` parameter</span>
+</span><span class='line'><span class="s2">  end</span>
+</span><span class='line'><span class="s2">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>This is super ghetto. I&rsquo;m gonna refine it in the coming day(s). Don&rsquo;t worry</h1>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Introduction to Volt Tasks]]></title>
+    <link href="http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks/"/>
+    <updated>2015-05-27T21:20:08+02:00</updated>
+    <id>http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks</id>
+    <content type="html"><![CDATA[<h1>Screencast - <a href="http://www.github.com/rickcarlino">@rickcarlino</a></h1>
+
+<iframe width="500" height="280" src="https://www.youtube.com/embed/th0UKrSFdo0" frameborder="0" allowfullscreen></iframe>
+
+
+<h1>Asciicast - <a href="http://www.github.com/yburyug">@ybur-yug</a></h1>
+
+<!-- more -->
+
+
+<h1>Volt Tasks - An Introduction</h1>
+
+<h2>Getting Started</h2>
+
+<p>First, let&rsquo;s get a basic application set up. I will assume you&rsquo;ve already dug around a simple project, but if you
+are completely new to Volt I would recommend reading through the documentation <a href="http://docs.voltframework.com">here</a>.
+We create a project with a simple</p>
+
+<p><code>volt new project_name</code></p>
+
+<p>And it will bundle automatically. However, if you prefer to bundle to a local path like I do using:</p>
+
+<p><code>bundle --path vendor/bundle</code></p>
+
+<p>This is what you should see after creating your first application:</p>
+
+<p><img src="http://i.imgur.com/ujb4F0E.gif" alt="step 1" /></p>
+
+<p>Now that we have a project, we can fire up our server and have the application start to run. One of the best things about
+development in Volt is the server will automatically reload your new code. So, start a server in a separate terminal and
+proceed to generate a task now.</p>
+
+<p>(in a new terminal)
+<code>bundle exec volt s</code></p>
+
+<p>(in the original)
+<code>bundle exec volt g task stat</code></p>
+
+<p>Now, let&rsquo;s see what that gets us:</p>
+
+<p><img src="http://i.imgur.com/8r3VaJQ.gif" alt="step 2" /></p>
+
+<p>So we have a Volt task, and the relevent spec. Let&rsquo;s open up the default task file and check it out:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="k">class</span> <span class="nc">StatTask</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Task</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, lets add some code to get information from the backend using this task we have generated. Volt tasks exclusively run
+asynchronously on the backend.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show_stats</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="ss">ruby_version</span><span class="p">:</span>     <span class="no">RUBY_VERSION</span><span class="p">,</span> <span class="c1"># note that these are constants always available in Ruby</span>
+</span><span class='line'>      <span class="ss">ruby_description</span><span class="p">:</span> <span class="no">RUBY_DESCRIPTION</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">ruby_platform</span><span class="p">:</span>    <span class="no">RUBY_PLATFORM</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/stat_task.rb#L2">Source</a></h5>
+
+<p>Now, this method is an instance level method. However, to call it in our controller Volt has a slightly different convention
+than the norm when it comes to invoking this. It is also worth noting that even though we are writing it as a Ruby hash, it
+will be coerced into a Volt model on the frontend. This becomes an important detail</p>
+
+<p>If we navigate to our controller, we can begin to handle the output from this.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="k">module</span> <span class="nn">Main</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">MainController</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">ModelController</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>      <span class="no">StatTask</span><span class="o">.</span><span class="n">show_stats</span>
+</span><span class='line'>      <span class="o">.</span><span class="n">then</span> <span class="k">do</span> <span class="o">|</span><span class="n">stats</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">stats</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">fail</span> <span class="k">do</span> <span class="o">|</span><span class="n">error</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">error</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
+
+<p>Now if we go to our client code in <code>app/main/views/main/index.html</code>, we have created a <code>page._info</code> Volt model we can access these parameters from. Not that is is accessed with a <code>_</code> prepended. This is another Volt convention.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;</span><span class="no">Ruby</span> <span class="no">Description</span><span class="o">&lt;</span><span class="sr">/h2&gt;</span>
+</span><span class='line'><span class="sr">    </span>
+</span><span class='line'><span class="sr">  &lt;h2&gt;Ruby Version&lt;/</span><span class="n">h2</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="p"></span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;</span><span class="no">Ruby</span> <span class="no">Platform</span><span class="o">&lt;</span><span class="sr">/h2&gt;</span>
+</span><span class='line'><span class="sr">    </span>
+</span><span class='line'><span class="sr"> ...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
+
+<h2>Going Further</h2>
+
+<p>Let&rsquo;s say we had a simple API we could hit and wanted to grab some data. As an example, I have created <a href="https://quiet-temple-1623.herokuapp.com/frontpage/1">this</a>.
+It is a simple wrapper for <a href="http://lobste.rs">Lobste.rs</a> that returns some JSON of the top stories in a <code>results</code>
+key. Using another Task we can mirror the frontpage of the site hitting this API. First, we need to add Mechanize
+to our Gemfile to easily get web responses.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;mechanize&#39;</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/Gemfile#L31">Source</a></h5>
+
+<p><code>bundle install</code> and we are ready to get going if we generate another task.</p>
+
+<p><code>volt generate task lobsters</code></p>
+
+<p>This will create our task just like last time and we can open it.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="nb">require</span> <span class="s1">&#39;json&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;mechanize&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">lobsters</span>
+</span><span class='line'>    <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="no">Mechanize</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;https://quiet-temple-1623.herokuapp.com/frontpage/1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/lobster_task.rb">Source</a></h5>
+
+<p>Now we just go into our <code>index.html</code> for <code>main</code> and we can add some logic to display our stories.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="p"></span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="n">h4</span><span class="o">&gt;&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="p"></span><span class="o">&lt;</span><span class="sr">/a&gt;&lt;/</span><span class="n">h4</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="p"></span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
+
+<p>And match that up with the <code>index</code> method on our controller:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='RUBY'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>      <span class="no">LobstersTask</span><span class="o">.</span><span class="n">lobsters</span>
+</span><span class='line'>      <span class="o">.</span><span class="n">then</span> <span class="k">do</span> <span class="o">|</span><span class="n">stories</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_stories</span> <span class="o">=</span> <span class="n">stories</span>
+</span><span class='line'>      <span class="k">end</span><span class="o">.</span><span class="n">fail</span> <span class="k">do</span> <span class="o">|</span><span class="n">err</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">page</span><span class="o">.</span><span class="n">_stories</span> <span class="o">=</span> <span class="n">err</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
+
+<p>And now we&rsquo;ve successfully executed code on only the server, and fed it to the client once the task was completed
+communicating both with 3rd party API&rsquo;s and our own server.</p>
+
+<h5><a href="http://young-harbor-8245.herokuapp.com/">Here</a> is a deployed version of the final app.</h5>
+
+<p>Happy Hacking.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[A Volt Chat Application in Ten Minutes]]></title>
+    <link href="http://fullstackruby.github.io/blog/2015/05/27/a-volt-chat-application-in-ten-minutes/"/>
+    <updated>2015-05-27T20:31:48+02:00</updated>
+    <id>http://fullstackruby.github.io/blog/2015/05/27/a-volt-chat-application-in-ten-minutes</id>
+    <content type="html"><![CDATA[<h1>Screencast - <a href="http://www.github.com/rickcarlino">@rickcarlino</a></h1>
+
+<iframe width="500" height="280" src="https://www.youtube.com/embed/rc4GR04KUy0" frameborder="0" allowfullscreen></iframe>
+
+
+<h1>Asciicast - <a href="http://www.github.com/yburyug">@ybur-yug</a></h1>
+
+<p><a href="https://github.com/DataMelon/volt-chat-demo">Source</a></p>
+
+<!-- more -->
+
+
+<h2>Building a Realtime Chat Application Using Only Ruby</h2>
+
+<h2>Why?</h2>
+
+<p>If you want to build a realtime chat app using Ruby, Volt makes a great choice because all of the updates happen in realtime like you
+see here, and you can write your frontend and backend code in Ruby. If you have not heard of Volt, follow along and you will start to
+see some great benefits. In this case, we will especially illustrate how to handle persistance and ownership for all of our data.</p>
+
+<h2>Setup</h2>
+
+<p>Like always, we&rsquo;re going to create a new app using the <code>volt new</code> command</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>volt new chat</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then we can <code>cd chat</code> to get to directory and get started.</p>
+
+<h2>Models!</h2>
+
+<p>First of all, we are writing in Ruby. So, Objects are our best friend! In Volt&rsquo;s case, the standard model object is <code>Volt::Model</code>.
+This will let us encapsulate business logic, pesistance, and relational pieces with other parts of the code in one simple area.
+For those of you who may be wondering, Volt is a MVVM framework, not MVC. For the curious, read further <a href="http://stackoverflow.com/questions/667781/what-is-the-difference-between-mvc-and-mvvm">here</a>.</p>
+
+<p>To make the model,</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>volt g model message</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>vim app/main/models/message.rb</code>
+I prefer to use <code>vim</code>, but replace that keyword with whatever the *nix command for your editor of choice is.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Message</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Model</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see, this is a very simple class, that outside of inheritance, looks like a regular Ruby class.</p>
+
+<p>MongoDB is a schemaless database, so we don&rsquo;t have to define our fields ahead of time. In today&rsquo;s example, we will though. This gives us the ability to add type validations and some other nice features I&rsquo;ll cover later.</p>
+
+<p>We can declare a field&rsquo;s name and type via the <code>field</code> method. This makes life easier by keeping our data relatively consistent.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Message</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Model</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body</span><span class="p">,</span> <span class="nb">String</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If we use the <code>field</code> helper, we get some wonderful validations and sanitazation for our input for essentially free.</p>
+
+<h2>Users!</h2>
+
+<p>Since this is a chat app, we&rsquo;re going to need a way of handling ownership. Luckily, Volt comes with user management by default, and also
+has some very convenient helpers.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Message</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Model</span>
+</span><span class='line'>  <span class="n">own_by_user</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body</span><span class="p">,</span> <span class="nb">String</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>own_by_user</code> adds a <code>user</code> field to the model and assigns the <code>current_user</code> to that model when it&rsquo;s created in the browser.
+It really is this easy. I know it&rsquo;s hard to believe.</p>
+
+<p>It also adds some nice authorization tools to handle permissions, but we won&rsquo;t cover that today. For more information, see the Volt API docs.</p>
+
+<h2>The Controller</h2>
+
+<p>Though Volt favors a component-based nature, for the sake of simplicity we will continue to isolate this in our <code>main</code> component
+and just use it&rsquo;s controller for the sake of brevity. Let&rsquo;s open it and peek at the default.</p>
+
+<p><code>vim app/main/controllers/main/main_controller.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Main</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">MainController</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">ModelController</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>      <span class="c1"># Add code for when the index view is loaded</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">about</span>
+</span><span class='line'>      <span class="c1"># Add code for when the about view is loaded</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># The main template contains a #template binding that shows another</span>
+</span><span class='line'>    <span class="c1"># template.  This is the path to that template.  It may change based</span>
+</span><span class='line'>    <span class="c1"># on the params._component, params._controller, and params._action values.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">main_path</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="n">params</span><span class="o">.</span><span class="n">_component</span> <span class="o">||</span> <span class="s1">&#39;main&#39;</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">params</span><span class="o">.</span><span class="n">_controller</span> <span class="o">||</span> <span class="s1">&#39;main&#39;</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">params</span><span class="o">.</span><span class="n">_action</span> <span class="o">||</span> <span class="s1">&#39;index&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Determine if the current nav component is the active one by looking</span>
+</span><span class='line'>    <span class="c1"># at the first part of the url against the href attribute.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">active_tab?</span>
+</span><span class='line'>      <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="n">attrs</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>index</code> action is executed in the browser whenever the user visits the root path of the site, as one might expect.</p>
+
+<p>This is a chat app, so we&rsquo;re going to need users to sign in before letting them chat. To do this, we use a <code>before_action</code> handler.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before_action</span> <span class="ss">:require_login</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you&rsquo;ve worked with Rails or Devise, this syntax should look pretty familiar.</p>
+
+<h2>Bootstraping a view</h2>
+
+<p>Since we are in our main component, let&rsquo;s open its view.</p>
+
+<p><code>vim app/main/views/main/index.html</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;:Title&gt;</span>
+</span><span class='line'>  Home
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;:Body&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;h1&gt;</span>Home<span class="nt">&lt;/h1&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We need a menu for users to chat with. Here is what we have.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  ...
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-lg-12&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;panel panel-default&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;panel-heading&quot;</span><span class="nt">&gt;</span>Chat<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;panel-body&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;form</span> <span class="na">class=</span><span class="s">&quot;form-inline center&quot;</span> <span class="na">e-submit=</span><span class="s">&quot;send_message&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;form-group&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">class=</span><span class="s">&quot;form-control&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;Enter a message&quot;</span> <span class="na">value=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span> <span class="na">class=</span><span class="s">&quot;btn btn-default&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;/form&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;hr/&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>              
+</span><span class='line'>                <span class="nt">&lt;p&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;strong&gt;</span><span class="nt">&lt;/strong&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;span&gt;</span><span class="nt">&lt;/span&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>              
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  ...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&rsquo;s talk about what&rsquo;s going on here.</p>
+
+<p>You might have noticed that we have some unfamiliar attributes on our tags, such as the <code>e-submit</code> attribute you see on this <code>&lt;form&gt;</code>
+tag. We also have some double mustache templates that contain ruby code. These features are known as &ldquo;bindings&rdquo;</p>
+
+<h2>Bindings</h2>
+
+<p>Be sure to follow up with <a href="http://docs.voltframework.com/en/docs/attribute_bindings.html">the documentation</a> for binding as well.</p>
+
+<p>As the name suggests, bindings are a way of binding data to your views. This all happens using Ruby- even on the front end.</p>
+
+<p>Inside the form tag, we were using an <code>e-submit</code> binding. That binding allows us to call a controller method whenever a form gets
+submitted. We haven&rsquo;t written that controller method yet, but when we do, it will handle saving a message to the database.
+We won&rsquo;t need to worry about publishing the changes to other users, because Volt handles that for us.</p>
+
+<h2>Two Way Binding</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>...
+</span><span class='line'>    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">class=</span><span class="s">&quot;form-control&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;Enter a message&quot;</span> <span class="na">value=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&rsquo;d like to point out something on our input tag. This binding right here is a two way data binding for a yet to be defined model.
+When we change the input value, it will change our model and vice versa. You might have also noticed I&rsquo;m binding to a variable
+called page.</p>
+
+<p> So what is this page variable doing exactly?</p>
+
+<h2>Provided Collections</h2>
+
+<p><a href="http://docs.voltframework.com/en/docs/provided_collections.html">Documentation about provided collections</a></p>
+
+<p>Volt comes with several pre-defined collections. A collection is a group of models with varying levels of persistence, depending
+on the use case.</p>
+
+<p>In our case, we&rsquo;re using the <code>page</code> collection, which is just a temporary holding area for models.</p>
+
+<p>Later on, we will use the &lsquo;store&rsquo; collection, which uses MongoDB for persistence.</p>
+
+<h2>More Models</h2>
+
+<p><a href="http://docs.voltframework.com/en/docs/models.html">Documentation</a>]</p>
+
+<p>You might have noticed that I was prefixing our model attributes with an underscore, as seen here in the documentation.</p>
+
+<p>In Volt, you can think of Models as objects similar to Hashes. They are usually schemaless, so you don&rsquo;t neccessarily need to define
+the attributes ahead of time, sort of like how a hash works, but unlike hashes, you access data using underscore attributes instead
+of square brackets.</p>
+
+<p>Let&rsquo;s open up a console.</p>
+
+<p><code>bundle exec volt c</code></p>
+
+<p>To illustrate the use of underscore attributes, let&rsquo;s make some models from the Volt console.</p>
+
+<p>In these examples, we will work with the <code>Message</code> model that we defined earlier.</p>
+
+<p>Since our Message model is stored in a schemaless MongoDB collection, that means we can add any attributes we need at runtime by using underscore attributes.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">message</span> <span class="o">=</span> <span class="no">Message</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">_anything</span> <span class="o">=</span> <span class="s2">&quot;Example&quot;</span>
+</span><span class='line'><span class="n">message</span>
+</span><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">_anything</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Since we declared an attribute called &lsquo;body&rsquo; at the begining of this video, we don&rsquo;t need an underscore to access that attribute.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">body</span>
+</span><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;Hello, world!&#39;</span>
+</span><span class='line'><span class="n">message</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>              <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Enter a message&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With our new understanding of how models work, we must populate an empty message model for our form to use. This will need to happen in the controller</p>
+
+<p>Our form is bound to page._form, so I will first write a method that populates some empty data.</p>
+
+<p><code>vim app/main/controllers/main/main_controller.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">reset_message</span>
+</span><span class='line'>  <span class="n">page</span><span class="o">.</span><span class="n">_form</span> <span class="o">=</span> <span class="no">Message</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then I will add that to the index action so that it gets called on page load</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="n">reset_message</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="n">form</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-inline center&quot;</span> <span class="n">e</span><span class="o">-</span><span class="n">submit</span><span class="o">=</span><span class="s2">&quot;send_message&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now to handle form submissions, we need to save the message object to the database and then clear out the form afterwards. As you can see by the <code>e-submit</code> binding, this behavior will be defined in a controller method named <code>send_message</code></p>
+
+<p>Back to <code>main_controller</code>&hellip;</p>
+
+<p>When we define <code>send_message</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">send_message</span>
+</span><span class='line'>    <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>we need to add the form model to <code>store</code> collection</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>      <span class="n">store</span><span class="o">.</span><span class="n">_messages</span> <span class="o">&lt;&lt;</span> <span class="n">page</span><span class="o">.</span><span class="n">_form</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then reset the form model so that the text box clears out</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">reset_message</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(highlight source code of <code>reset_message</code>)</p>
+
+<p>Let&rsquo;s go to our browser, visit <code>localhost:3000</code> after running <code>bundle exec volt s</code></p>
+
+<p>It looks like we&rsquo;re done. As you can see, it&rsquo;s asking us to log in.</p>
+
+<p>That&rsquo;s all there is to it. I hope you&rsquo;ve enjoyed watching. Feel free to leave comments if you have any questions.</p>
+]]></content>
+  </entry>
   
 </feed>

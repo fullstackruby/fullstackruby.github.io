@@ -1,0 +1,607 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>A Volt Chat Application in Ten Minutes - Full Stack Ruby</title>
+  <meta name="author" content="Collective">
+
+  
+  <meta name="description" content="Screencast - @rickcarlino Asciicast - @ybur-yug Source Building a Realtime Chat Application Using Only Ruby Why? If you want to build a realtime chat &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://fullstackruby.github.io/blog/2015/05/27/a-volt-chat-application-in-ten-minutes">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Full Stack Ruby" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Full Stack Ruby</a></h1>
+  
+    <h2>Ruby All The Way.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="fullstackruby.github.io" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">A Volt Chat Application in Ten Minutes</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-05-27T20:31:48+02:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>8:31 pm</span></time>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>Screencast - <a href="http://www.github.com/rickcarlino">@rickcarlino</a></h1>
+
+<iframe width="500" height="280" src="https://www.youtube.com/embed/rc4GR04KUy0" frameborder="0" allowfullscreen></iframe>
+
+
+<h1>Asciicast - <a href="http://www.github.com/yburyug">@ybur-yug</a></h1>
+
+<p><a href="https://github.com/DataMelon/volt-chat-demo">Source</a></p>
+
+<!-- more -->
+
+
+<h2>Building a Realtime Chat Application Using Only Ruby</h2>
+
+<h2>Why?</h2>
+
+<p>If you want to build a realtime chat app using Ruby, Volt makes a great choice because all of the updates happen in realtime like you
+see here, and you can write your frontend and backend code in Ruby. If you have not heard of Volt, follow along and you will start to
+see some great benefits. In this case, we will especially illustrate how to handle persistance and ownership for all of our data.</p>
+
+<h2>Setup</h2>
+
+<p>Like always, we&rsquo;re going to create a new app using the <code>volt new</code> command</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>volt new chat</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then we can <code>cd chat</code> to get to directory and get started.</p>
+
+<h2>Models!</h2>
+
+<p>First of all, we are writing in Ruby. So, Objects are our best friend! In Volt&rsquo;s case, the standard model object is <code>Volt::Model</code>.
+This will let us encapsulate business logic, pesistance, and relational pieces with other parts of the code in one simple area.
+For those of you who may be wondering, Volt is a MVVM framework, not MVC. For the curious, read further <a href="http://stackoverflow.com/questions/667781/what-is-the-difference-between-mvc-and-mvvm">here</a>.</p>
+
+<p>To make the model,</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>volt g model message</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>vim app/main/models/message.rb</code>
+I prefer to use <code>vim</code>, but replace that keyword with whatever the *nix command for your editor of choice is.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Message</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Model</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see, this is a very simple class, that outside of inheritance, looks like a regular Ruby class.</p>
+
+<p>MongoDB is a schemaless database, so we don&rsquo;t have to define our fields ahead of time. In today&rsquo;s example, we will though. This gives us the ability to add type validations and some other nice features I&rsquo;ll cover later.</p>
+
+<p>We can declare a field&rsquo;s name and type via the <code>field</code> method. This makes life easier by keeping our data relatively consistent.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Message</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Model</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body</span><span class="p">,</span> <span class="nb">String</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If we use the <code>field</code> helper, we get some wonderful validations and sanitazation for our input for essentially free.</p>
+
+<h2>Users!</h2>
+
+<p>Since this is a chat app, we&rsquo;re going to need a way of handling ownership. Luckily, Volt comes with user management by default, and also
+has some very convenient helpers.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Message</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">Model</span>
+</span><span class='line'>  <span class="n">own_by_user</span>
+</span><span class='line'>  <span class="n">field</span> <span class="ss">:body</span><span class="p">,</span> <span class="nb">String</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>own_by_user</code> adds a <code>user</code> field to the model and assigns the <code>current_user</code> to that model when it&rsquo;s created in the browser.
+It really is this easy. I know it&rsquo;s hard to believe.</p>
+
+<p>It also adds some nice authorization tools to handle permissions, but we won&rsquo;t cover that today. For more information, see the Volt API docs.</p>
+
+<h2>The Controller</h2>
+
+<p>Though Volt favors a component-based nature, for the sake of simplicity we will continue to isolate this in our <code>main</code> component
+and just use it&rsquo;s controller for the sake of brevity. Let&rsquo;s open it and peek at the default.</p>
+
+<p><code>vim app/main/controllers/main/main_controller.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Main</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">MainController</span> <span class="o">&lt;</span> <span class="no">Volt</span><span class="o">::</span><span class="no">ModelController</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>      <span class="c1"># Add code for when the index view is loaded</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">about</span>
+</span><span class='line'>      <span class="c1"># Add code for when the about view is loaded</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># The main template contains a #template binding that shows another</span>
+</span><span class='line'>    <span class="c1"># template.  This is the path to that template.  It may change based</span>
+</span><span class='line'>    <span class="c1"># on the params._component, params._controller, and params._action values.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">main_path</span>
+</span><span class='line'>      <span class="s2">&quot;</span><span class="si">#{</span><span class="n">params</span><span class="o">.</span><span class="n">_component</span> <span class="o">||</span> <span class="s1">&#39;main&#39;</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">params</span><span class="o">.</span><span class="n">_controller</span> <span class="o">||</span> <span class="s1">&#39;main&#39;</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">params</span><span class="o">.</span><span class="n">_action</span> <span class="o">||</span> <span class="s1">&#39;index&#39;</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1"># Determine if the current nav component is the active one by looking</span>
+</span><span class='line'>    <span class="c1"># at the first part of the url against the href attribute.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">active_tab?</span>
+</span><span class='line'>      <span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">==</span> <span class="n">attrs</span><span class="o">.</span><span class="n">href</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>The <code>index</code> action is executed in the browser whenever the user visits the root path of the site, as one might expect.</p>
+
+<p>This is a chat app, so we&rsquo;re going to need users to sign in before letting them chat. To do this, we use a <code>before_action</code> handler.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before_action</span> <span class="ss">:require_login</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:index</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you&rsquo;ve worked with Rails or Devise, this syntax should look pretty familiar.</p>
+
+<h2>Bootstraping a view</h2>
+
+<p>Since we are in our main component, let&rsquo;s open its view.</p>
+
+<p><code>vim app/main/views/main/index.html</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;:Title&gt;</span>
+</span><span class='line'>  Home
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;:Body&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;h1&gt;</span>Home<span class="nt">&lt;/h1&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We need a menu for users to chat with. Here is what we have.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>  ...
+</span><span class='line'>  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-lg-12&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;panel panel-default&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;panel-heading&quot;</span><span class="nt">&gt;</span>Chat<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;panel-body&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;form</span> <span class="na">class=</span><span class="s">&quot;form-inline center&quot;</span> <span class="na">e-submit=</span><span class="s">&quot;send_message&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;form-group&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>              <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">class=</span><span class="s">&quot;form-control&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;Enter a message&quot;</span> <span class="na">value=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;submit&quot;</span> <span class="na">class=</span><span class="s">&quot;btn btn-default&quot;</span><span class="nt">/&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;/form&gt;</span>
+</span><span class='line'>          <span class="nt">&lt;hr/&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div&gt;</span>
+</span><span class='line'>              
+</span><span class='line'>                <span class="nt">&lt;p&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;strong&gt;</span><span class="nt">&lt;/strong&gt;</span>
+</span><span class='line'>                  <span class="nt">&lt;span&gt;</span><span class="nt">&lt;/span&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/p&gt;</span>
+</span><span class='line'>              
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>  ...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Let&rsquo;s talk about what&rsquo;s going on here.</p>
+
+<p>You might have noticed that we have some unfamiliar attributes on our tags, such as the <code>e-submit</code> attribute you see on this <code>&lt;form&gt;</code>
+tag. We also have some double mustache templates that contain ruby code. These features are known as &ldquo;bindings&rdquo;</p>
+
+<h2>Bindings</h2>
+
+<p>Be sure to follow up with <a href="http://docs.voltframework.com/en/docs/attribute_bindings.html">the documentation</a> for binding as well.</p>
+
+<p>As the name suggests, bindings are a way of binding data to your views. This all happens using Ruby- even on the front end.</p>
+
+<p>Inside the form tag, we were using an <code>e-submit</code> binding. That binding allows us to call a controller method whenever a form gets
+submitted. We haven&rsquo;t written that controller method yet, but when we do, it will handle saving a message to the database.
+We won&rsquo;t need to worry about publishing the changes to other users, because Volt handles that for us.</p>
+
+<h2>Two Way Binding</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'>...
+</span><span class='line'>    <span class="nt">&lt;input</span> <span class="na">type=</span><span class="s">&quot;text&quot;</span> <span class="na">class=</span><span class="s">&quot;form-control&quot;</span> <span class="na">placeholder=</span><span class="s">&quot;Enter a message&quot;</span> <span class="na">value=</span><span class="s">&quot;&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>...
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I&rsquo;d like to point out something on our input tag. This binding right here is a two way data binding for a yet to be defined model.
+When we change the input value, it will change our model and vice versa. You might have also noticed I&rsquo;m binding to a variable
+called page.</p>
+
+<p> So what is this page variable doing exactly?</p>
+
+<h2>Provided Collections</h2>
+
+<p><a href="http://docs.voltframework.com/en/docs/provided_collections.html">Documentation about provided collections</a></p>
+
+<p>Volt comes with several pre-defined collections. A collection is a group of models with varying levels of persistence, depending
+on the use case.</p>
+
+<p>In our case, we&rsquo;re using the <code>page</code> collection, which is just a temporary holding area for models.</p>
+
+<p>Later on, we will use the &lsquo;store&rsquo; collection, which uses MongoDB for persistence.</p>
+
+<h2>More Models</h2>
+
+<p><a href="http://docs.voltframework.com/en/docs/models.html">Documentation</a>]</p>
+
+<p>You might have noticed that I was prefixing our model attributes with an underscore, as seen here in the documentation.</p>
+
+<p>In Volt, you can think of Models as objects similar to Hashes. They are usually schemaless, so you don&rsquo;t neccessarily need to define
+the attributes ahead of time, sort of like how a hash works, but unlike hashes, you access data using underscore attributes instead
+of square brackets.</p>
+
+<p>Let&rsquo;s open up a console.</p>
+
+<p><code>bundle exec volt c</code></p>
+
+<p>To illustrate the use of underscore attributes, let&rsquo;s make some models from the Volt console.</p>
+
+<p>In these examples, we will work with the <code>Message</code> model that we defined earlier.</p>
+
+<p>Since our Message model is stored in a schemaless MongoDB collection, that means we can add any attributes we need at runtime by using underscore attributes.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">message</span> <span class="o">=</span> <span class="no">Message</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">_anything</span> <span class="o">=</span> <span class="s2">&quot;Example&quot;</span>
+</span><span class='line'><span class="n">message</span>
+</span><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">_anything</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Since we declared an attribute called &lsquo;body&rsquo; at the begining of this video, we don&rsquo;t need an underscore to access that attribute.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">body</span>
+</span><span class='line'><span class="n">message</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;Hello, world!&#39;</span>
+</span><span class='line'><span class="n">message</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>              <span class="o">&lt;</span><span class="n">input</span> <span class="n">type</span><span class="o">=</span><span class="s2">&quot;text&quot;</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-control&quot;</span> <span class="n">placeholder</span><span class="o">=</span><span class="s2">&quot;Enter a message&quot;</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">&gt;</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With our new understanding of how models work, we must populate an empty message model for our form to use. This will need to happen in the controller</p>
+
+<p>Our form is bound to page._form, so I will first write a method that populates some empty data.</p>
+
+<p><code>vim app/main/controllers/main/main_controller.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">reset_message</span>
+</span><span class='line'>  <span class="n">page</span><span class="o">.</span><span class="n">_form</span> <span class="o">=</span> <span class="no">Message</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then I will add that to the index action so that it gets called on page load</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="n">reset_message</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="n">form</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;form-inline center&quot;</span> <span class="n">e</span><span class="o">-</span><span class="n">submit</span><span class="o">=</span><span class="s2">&quot;send_message&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now to handle form submissions, we need to save the message object to the database and then clear out the form afterwards. As you can see by the <code>e-submit</code> binding, this behavior will be defined in a controller method named <code>send_message</code></p>
+
+<p>Back to <code>main_controller</code>&hellip;</p>
+
+<p>When we define <code>send_message</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">send_message</span>
+</span><span class='line'>    <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>we need to add the form model to <code>store</code> collection</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>      <span class="n">store</span><span class="o">.</span><span class="n">_messages</span> <span class="o">&lt;&lt;</span> <span class="n">page</span><span class="o">.</span><span class="n">_form</span>
+</span><span class='line'><span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>then reset the form model so that the text box clears out</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">reset_message</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>(highlight source code of <code>reset_message</code>)</p>
+
+<p>Let&rsquo;s go to our browser, visit <code>localhost:3000</code> after running <code>bundle exec volt s</code></p>
+
+<p>It looks like we&rsquo;re done. As you can see, it&rsquo;s asking us to log in.</p>
+
+<p>That&rsquo;s all there is to it. I hope you&rsquo;ve enjoyed watching. Feel free to leave comments if you have any questions.</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    Collective
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-05-27T20:31:48+02:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>8:31 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby,</a>, <a class='category' href='/blog/categories/volt/'>volt</a>, <a class='category' href='/blog/categories/webdev/'>webdev,</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://fullstackruby.github.io/blog/2015/05/27/a-volt-chat-application-in-ten-minutes/" data-via="" data-counturl="http://fullstackruby.github.io/blog/2015/05/27/a-volt-chat-application-in-ten-minutes/" >Tweet</a>
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/05/27/introduction-to-volt-tasks/" title="Next Post: Introduction to Volt Tasks">Introduction to Volt Tasks &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - Collective -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

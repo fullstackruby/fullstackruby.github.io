@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ruby,api,sinatra | Full Stack Ruby]]></title>
+  <link href="http://fullstackruby.github.io/blog/categories/ruby-api-sinatra/atom.xml" rel="self"/>
+  <link href="http://fullstackruby.github.io/"/>
+  <updated>2015-05-28T00:15:58+02:00</updated>
+  <id>http://fullstackruby.github.io/</id>
+  <author>
+    <name><![CDATA[Collective]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby &amp; OCR]]></title>
+    <link href="http://fullstackruby.github.io/blog/2015/05/27/ruby-and-ocr/"/>
+    <updated>2015-05-27T21:45:41+02:00</updated>
+    <id>http://fullstackruby.github.io/blog/2015/05/27/ruby-and-ocr</id>
+    <content type="html"><![CDATA[<h4>(Adapted from <a href="http://www.github.com/ybur-yug">@yburyug&rsquo;s</a> original Python guide)</h4>
+
+<h2>Why?</h2>
+
+<p>A) Obviously it just sounds fun as shit.</p>
+
+<p>B) Real world use. I mean, we do have to go paperless somehow right?
+OCR has become common. With the advent of libraries such as Tesseract, Ocrad, and more people
+have built hundreds of bots and libraries that use them in interesting ways. A trivial example is Meme Reading
+bots on Reddit. Extracting text from images on sites like Tumblr or Pinterest that have overlay text commonly
+also can be used in order to further add natural language analysis data into models to predict it.</p>
+
+<!-- more -->
+
+
+<h2>Beginning steps</h2>
+
+<p>There are two potential options for building this in the simplest scale. We will go through building the server
+layer here as a simple means to have an API resource we can hit from a frontend framework in order to make
+and application based around this. The other is to generate the HTML serverside. We will take the former approach.</p>
+
+<p>First, we have to install some dependencies. As always, configuring your environment is 90% of the fun.</p>
+
+<blockquote><p>This post has been tested on Ubuntu version 14.04 but it should work for 12.x and 13.x versions as well. If you&rsquo;re running OSX, you can use <a href="http://osxdaily.com/2012/03/27/install-run-ubuntu-linux-virtualbox/">VirtualBox</a> or a droplet on <a href="https://www.digitalocean.com/">DigitalOcean</a> (recommended!) to create the appropriate environment.</p></blockquote>
+
+<h3>Downloading dependencies</h3>
+
+<p>We need <a href="http://en.wikipedia.org/wiki/Tesseract_%28software%29">Tesseract</a> and all of its dependencies, which includes <a href="http://www.leptonica.com/">Leptonica</a>, as well as some other packages that power these two for sanity checks to start. Now, I could just give you a list of magic commands that I know work in the env. But, lets explain things a bit first.</p>
+
+<blockquote><p>NOTE: You can also use the <a href="link">_run.sh</a> shell script to quickly install the dependencies along with Leptonica and Tesseract and the relevant English language packages. If you go this route, skip down to the <a href="link">Web-server time!</a> section. But please consider manually building these libraries if you have not before. It is chicken soup for the hacker&rsquo;s soul to play with tarballs and make. However, first are our regular apt-get dependencies (before we get fancy).</p></blockquote>
+
+<pre><code class="sh">$ sudo apt-get update
+$ sudo apt-get install autoconf automake libtool
+$ sudo apt-get install libpng12-dev
+$ sudo apt-get install libjpeg62-dev
+$ sudo apt-get install g++
+$ sudo apt-get install libtiff4-dev
+$ sudo apt-get install libopencv-dev libtesseract-dev 
+$ sudo apt-get install git 
+$ sudo apt-get install cmake 
+$ sudo apt-get install build-essential
+$ sudo apt-get install libleptonica-dev
+$ sudo apt-get install liblog4cplus-dev
+$ sudo apt-get install libcurl3-dev
+$ sudo apt-get install python2.7-dev
+$ sudo apt-get install tk8.5 tcl8.5 tk8.5-dev tcl8.5-dev
+$ sudo apt-get build-dep python-imaging --fix-missing
+</code></pre>
+
+<p>We run <code>sudo apt-get update</code> is short for &lsquo;make sure we have the latest package listings.
+<code>g++</code> is the GNU compiled collection.
+We also get a bunch of libraries that allow us to toy with images. ie <code>libtiff</code> <code>libpng</code> etc.
+We also get <code>git</code>, which if you lack famliiarity with but have found yourself here, you may want to read <a href="link">The Git Book</a>.
+Beyond this, we also ensure we have <code>Python 2.7</code>, our programming language of choice.
+We then get the <code>python-imaging</code> library set up for interaction with all these pieces.</p>
+
+<p>Speaking of images: now, we&rsquo;ll need <a href="http://www.imagemagick.org/">ImageMagick</a> as well if we want to toy with images
+before we throw them in programmatically, now that we have all the libraries needed to understand and parse them in..</p>
+
+<pre><code class="sh">$ sudo apt-get install imagemagick
+</code></pre>
+
+<h3>Building Leptonica</h3>
+
+<p>Now, time for Leptonica, finally! (Unless you ran the shell scripts and for some reason are seeing this. In which case proceed to the <a href="link">Webserver Time!</a> section.</p>
+
+<pre><code class="sh">$ wget http://www.leptonica.org/source/leptonica-1.70.tar.gz
+$ tar -zxvf leptonica-1.70.tar.gz
+$ cd leptonica-1.70/
+$ ./autobuild
+$ ./configure
+$ make
+$ sudo make install
+$ sudo ldconfig
+</code></pre>
+
+<p>If this is your first time playing with tar, heres what we are doing:</p>
+
+<ul>
+<li>get the binary for Leptonica (<code>wget</code>)</li>
+<li>unzip the tarball  and  (<code>x</code> for extract, <code>v</code> for verbose&hellip;etc. For a detailed explanation: <code>man tar</code>)</li>
+<li><code>cd</code> into our new unpacked directory</li>
+<li>run <code>autobuild</code> and <code>configure</code> bash scripts to set up the application</li>
+<li>use <code>make</code> to build it</li>
+<li>install it with <code>make</code> after the build</li>
+<li>create necessary links with <code>ldconfig</code></li>
+</ul>
+
+
+<p>Boom, now we have Leptonica. On to Tesseract!</p>
+
+<h3>Building Tesseract</h3>
+
+<p>And now to download and build Tesseract&hellip;</p>
+
+<pre><code class="sh">$ cd ..
+$ wget https://tesseract-ocr.googlecode.com/files/tesseract-ocr-3.02.02.tar.gz
+$ tar -zxvf tesseract-ocr-3.02.02.tar.gz
+$ cd tesseract-ocr/
+$ ./autogen.sh
+$ ./configure
+$ make
+$ sudo make install
+$ sudo ldconfig
+</code></pre>
+
+<p>The process here mirrors the Leptonica one almost perfectly. So for explanation, I&rsquo;ll keep this DRY and just say see above.</p>
+
+<p>We need to set up an environment variable to source our Tesseract data, so we&rsquo;ll take care of that now:</p>
+
+<pre><code class="sh">$ export TESSDATA_PREFIX=/usr/local/share/
+</code></pre>
+
+<p>Now, lets get the Tesseract english language packages that are relevant:</p>
+
+<pre><code>$ cd ..
+$ wget https://tesseract-ocr.googlecode.com/files/tesseract-ocr-3.02.eng.tar.gz
+$ tar -xf tesseract-ocr-3.02.eng.tar.gz
+$ sudo cp -r tesseract-ocr/tessdata $TESSDATA_PREFIX
+</code></pre>
+
+<p>BOOM! We now have Tesseract. We can use the CLI. Feel free to read the <a href="https://code.google.com/p/tesseract-ocr/">docs</a> if you want to play. However, we need a Python wrapper to truly achieve our end goal. So the next step is setting
+up a Flask server that will allow us to easily build an API that we will POST requests to with a link to an image, and it will run the character recognition on them.</p>
+
+<h2>Web-server time!</h2>
+
+<p>Now, on to the fun stuff. First, we will need to build a way to interface with Tesseract via Ruby. We COULD use <code>popen</code>
+but that just is wrong. The prolific <a href="gh%20link">Meh</a> has created a very robust Ruby wrapper for tesseract that we will
+be utilizing for this. It has the most features of any wrapper that I have found thus far, and is a joy to use. In this
+initial guide we will go over simply using its basic API, but will dive in further in a later post.</p>
+
+<p>Building this server shouldn&rsquo;t be much of a challenge, but let&rsquo;s assume you might have never had to do so before. I prefer
+to use <a href="http://www.sinatrarb.com">Sinatra</a> for simple API&rsquo;s like this one. Since we have a blank slate, we may as well take
+the TDD approach.</p>
+
+<pre><code class="sh">mkdir ocr_api
+cd ocr_api
+mkdir lib spec
+touch spec/integration_spec.rb
+</code></pre>
+
+<p>Now, run</p>
+
+<p><code>bundle init</code></p>
+
+<p>so we have a Gemfile, and we can open that up with</p>
+
+<p><code>vim Gemfile</code></p>
+
+<p>(I use vim, but replace that with any editor of your choice&rsquo;s unix command)</p>
+
+<pre><code class="ruby">...
+gem 'sinatra'
+gem 'tesseract-ocr'
+
+group :development, :test do
+  gem 'pry'
+  gem 'rspec'
+end
+...
+</code></pre>
+
+<p>and now in <code>integration_spec.rb</code></p>
+
+<pre><code class="ruby">require 'rack/test'
+require 'rspec'
+require './lib/server'
+
+require File.expand_path '../../my-app.rb', __FILE__
+
+ENV['RACK_ENV'] = 'test'
+
+module RSpecMixin
+  include Rack::Test::Methods
+  def app() Sinatra::Application end
+end
+
+RSpec.configure { |c| c.include RSpecMixin }
+Spec::Runner.configure { |c| c.include RSpecMixin }
+
+# The above gets our rack env set up for sinatra testing
+
+describe "Our Sinatra App" do
+  it "should allow access to the root route" do
+    get "/"
+    last_response.should be_ok
+  end
+end
+</code></pre>
+
+<p>now we can actually make a file to pass this test&hellip;</p>
+
+<p><code>vim lib/server.rb</code></p>
+
+<pre><code class="ruby">require 'sinatra'
+
+get "/" do
+  "hello world"
+end
+</code></pre>
+
+<p>Now, let&rsquo;s create a simple class to get our image and get text for it.</p>
+
+<p><code>lib/server.rb</code></p>
+
+<pre><code class="ruby">require 'open-uri'
+...
+class OcrEngine
+  def initialize
+    @engine = Tesseract::Engine.new { |e| e.language = :eng }
+  end
+
+  def parse_image url
+    @engine.text_for(get_image(image))
+  end
+
+  private
+
+  get_image img_url
+    open(img_url).read
+  end
+end
+...
+</code></pre>
+
+<p>And now if we define our route to take a POST request instead of a GET request:</p>
+
+<pre><code>post '/' do
+  if params['image_url']
+    OcrEngine.new.parse_image(params['image_url']
+  else
+    "Please supply an `image_url` parameter
+  end
+end
+</code></pre>
+
+<h1>This is super ghetto. I&rsquo;m gonna refine it in the coming day(s). Don&rsquo;t worry</h1>
+]]></content>
+  </entry>
+  
+</feed>

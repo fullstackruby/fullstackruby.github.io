@@ -1,9 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://fullstackruby.github.io/blog/2015/05/27/ruby-and-ocr/</loc>
+    <lastmod>2015-05-27T21:45:41+02:00</lastmod>
+  </url>
+  <url>
+    <loc>http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks/</loc>
+    <lastmod>2015-05-27T21:20:08+02:00</lastmod>
+  </url>
+  <url>
+    <loc>http://fullstackruby.github.io/blog/2015/05/27/a-volt-chat-application-in-ten-minutes/</loc>
+    <lastmod>2015-05-27T20:31:48+02:00</lastmod>
+  </url>
+  <url>
     <loc>http://fullstackruby.github.io/blog/archives/</loc>
   </url>
   <url>
     <loc>http://fullstackruby.github.io/</loc>
+  </url>
+  <url>
+    <loc>http://fullstackruby.github.io/about/</loc>
+  </url>
+  <url>
+    <loc>http://fullstackruby.github.io/blog/categories/ruby/</loc>
+  </url>
+  <url>
+    <loc>http://fullstackruby.github.io/blog/categories/webdev/</loc>
+  </url>
+  <url>
+    <loc>http://fullstackruby.github.io/blog/categories/volt/</loc>
+  </url>
+  <url>
+    <loc>http://fullstackruby.github.io/blog/categories/ruby-api-sinatra/</loc>
   </url>
 </urlset>
