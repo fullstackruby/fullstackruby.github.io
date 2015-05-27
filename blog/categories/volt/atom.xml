@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Volt | Full Stack Ruby]]></title>
   <link href="http://fullstackruby.github.io/blog/categories/volt/atom.xml" rel="self"/>
   <link href="http://fullstackruby.github.io/"/>
-  <updated>2015-05-28T00:28:28+02:00</updated>
+  <updated>2015-05-28T00:37:23+02:00</updated>
   <id>http://fullstackruby.github.io/</id>
   <author>
     <name><![CDATA[Collective]]></name>
@@ -12,181 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[Introduction to Volt Tasks]]></title>
-    <link href="http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks/"/>
-    <updated>2015-05-27T21:20:08+02:00</updated>
-    <id>http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks</id>
-    <content type="html"><![CDATA[<h1>Screencast - <a href="http://www.github.com/rickcarlino">@rickcarlino</a></h1>
-
-<iframe width="500" height="280" src="https://www.youtube.com/embed/th0UKrSFdo0" frameborder="0" allowfullscreen></iframe>
-
-
-<h1>Asciicast - <a href="http://www.github.com/yburyug">@ybur-yug</a></h1>
-
-<!-- more -->
-
-
-<h1>Volt Tasks - An Introduction</h1>
-
-<h2>Getting Started</h2>
-
-<p>First, let&rsquo;s get a basic application set up. I will assume you&rsquo;ve already dug around a simple project, but if you
-are completely new to Volt I would recommend reading through the documentation <a href="http://docs.voltframework.com">here</a>.
-We create a project with a simple</p>
-
-<p><code>volt new project_name</code></p>
-
-<p>And it will bundle automatically. However, if you prefer to bundle to a local path like I do using:</p>
-
-<p><code>bundle --path vendor/bundle</code></p>
-
-<p>This is what you should see after creating your first application:</p>
-
-<p><img src="http://i.imgur.com/ujb4F0E.gif" alt="step 1" /></p>
-
-<p>Now that we have a project, we can fire up our server and have the application start to run. One of the best things about
-development in Volt is the server will automatically reload your new code. So, start a server in a separate terminal and
-proceed to generate a task now.</p>
-
-<p>(in a new terminal)
-<code>bundle exec volt s</code></p>
-
-<p>(in the original)
-<code>bundle exec volt g task stat</code></p>
-
-<p>Now, let&rsquo;s see what that gets us:</p>
-
-<p><img src="http://i.imgur.com/8r3VaJQ.gif" alt="step 2" /></p>
-
-<p>So we have a Volt task, and the relevent spec. Let&rsquo;s open up the default task file and check it out:</p>
-
-<pre><code class="RUBY">class StatTask &lt; Volt::Task
-
-end
-</code></pre>
-
-<p>Now, lets add some code to get information from the backend using this task we have generated. Volt tasks exclusively run
-asynchronously on the backend.</p>
-
-<pre><code class="RUBY">...
-  def show_stats
-    {
-      ruby_version:     RUBY_VERSION, # note that these are constants always available in Ruby
-      ruby_description: RUBY_DESCRIPTION,
-      ruby_platform:    RUBY_PLATFORM
-    }
-  end
-...
-</code></pre>
-
-<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/stat_task.rb#L2">Source</a></h5>
-
-<p>Now, this method is an instance level method. However, to call it in our controller Volt has a slightly different convention
-than the norm when it comes to invoking this. It is also worth noting that even though we are writing it as a Ruby hash, it
-will be coerced into a Volt model on the frontend. This becomes an important detail</p>
-
-<p>If we navigate to our controller, we can begin to handle the output from this.</p>
-
-<pre><code class="RUBY">module Main
-  class MainController &lt; Volt::ModelController
-    def index
-      StatTask.show_stats
-      .then do |stats|
-        page._info = stats
-      end.fail do |error|
-        page._info = error
-      end
-    ...
-   end
-end
-</code></pre>
-
-<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
-
-<p>Now if we go to our client code in <code>app/main/views/main/index.html</code>, we have created a <code>page._info</code> Volt model we can access these parameters from. Not that is is accessed with a <code>_</code> prepended. This is another Volt convention.</p>
-
-<pre><code class="RUBY">...
-  &lt;h2&gt;Ruby Description&lt;/h2&gt;
-    
-  &lt;h2&gt;Ruby Version&lt;/h2&gt;
-    
-  &lt;h2&gt;Ruby Platform&lt;/h2&gt;
-    
- ...
-</code></pre>
-
-<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
-
-<h2>Going Further</h2>
-
-<p>Let&rsquo;s say we had a simple API we could hit and wanted to grab some data. As an example, I have created <a href="https://quiet-temple-1623.herokuapp.com/frontpage/1">this</a>.
-It is a simple wrapper for <a href="http://lobste.rs">Lobste.rs</a> that returns some JSON of the top stories in a <code>results</code>
-key. Using another Task we can mirror the frontpage of the site hitting this API. First, we need to add Mechanize
-to our Gemfile to easily get web responses.</p>
-
-<pre><code class="RUBY">...
-gem 'mechanize'
-...
-</code></pre>
-
-<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/Gemfile#L31">Source</a></h5>
-
-<p><code>bundle install</code> and we are ready to get going if we generate another task.</p>
-
-<p><code>volt generate task lobsters</code></p>
-
-<p>This will create our task just like last time and we can open it.</p>
-
-<pre><code class="RUBY">require 'json'
-require 'mechanize'
-
-...
-  def lobsters
-    JSON.parse(Mechanize.new.get('https://quiet-temple-1623.herokuapp.com/frontpage/1').content)
-  end
-...
-</code></pre>
-
-<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/lobster_task.rb">Source</a></h5>
-
-<p>Now we just go into our <code>index.html</code> for <code>main</code> and we can add some logic to display our stories.</p>
-
-<pre><code class="RUBY">...
-  
-    &lt;h4&gt;&lt;a href=''&gt;
-    &lt;/a&gt;&lt;/h4&gt;
-  
-...
-</code></pre>
-
-<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
-
-<p>And match that up with the <code>index</code> method on our controller:</p>
-
-<pre><code class="RUBY">...
-    def index
-      LobstersTask.lobsters
-      .then do |stories|
-        page._stories = stories
-      end.fail do |err|
-        page._stories = err
-      end
-    end
-...
-</code></pre>
-
-<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
-
-<p>And now we&rsquo;ve successfully executed code on only the server, and fed it to the client once the task was completed
-communicating both with 3rd party API&rsquo;s and our own server.</p>
-
-<h5><a href="http://young-harbor-8245.herokuapp.com/">Here</a> is a deployed version of the final app.</h5>
-
-<p>Happy Hacking.</p>
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[A Volt Chat Application in Ten Minutes]]></title>
@@ -487,6 +312,181 @@ message
 <p>It looks like we&rsquo;re done. As you can see, it&rsquo;s asking us to log in.</p>
 
 <p>That&rsquo;s all there is to it. I hope you&rsquo;ve enjoyed watching. Feel free to leave comments if you have any questions.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Introduction to Volt Tasks]]></title>
+    <link href="http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks/"/>
+    <updated>2015-05-27T19:20:08+02:00</updated>
+    <id>http://fullstackruby.github.io/blog/2015/05/27/introduction-to-volt-tasks</id>
+    <content type="html"><![CDATA[<h1>Screencast - <a href="http://www.github.com/rickcarlino">@rickcarlino</a></h1>
+
+<iframe width="500" height="280" src="https://www.youtube.com/embed/th0UKrSFdo0" frameborder="0" allowfullscreen></iframe>
+
+
+<h1>Asciicast - <a href="http://www.github.com/yburyug">@ybur-yug</a></h1>
+
+<!-- more -->
+
+
+<h1>Volt Tasks - An Introduction</h1>
+
+<h2>Getting Started</h2>
+
+<p>First, let&rsquo;s get a basic application set up. I will assume you&rsquo;ve already dug around a simple project, but if you
+are completely new to Volt I would recommend reading through the documentation <a href="http://docs.voltframework.com">here</a>.
+We create a project with a simple</p>
+
+<p><code>volt new project_name</code></p>
+
+<p>And it will bundle automatically. However, if you prefer to bundle to a local path like I do using:</p>
+
+<p><code>bundle --path vendor/bundle</code></p>
+
+<p>This is what you should see after creating your first application:</p>
+
+<p><img src="http://i.imgur.com/ujb4F0E.gif" alt="step 1" /></p>
+
+<p>Now that we have a project, we can fire up our server and have the application start to run. One of the best things about
+development in Volt is the server will automatically reload your new code. So, start a server in a separate terminal and
+proceed to generate a task now.</p>
+
+<p>(in a new terminal)
+<code>bundle exec volt s</code></p>
+
+<p>(in the original)
+<code>bundle exec volt g task stat</code></p>
+
+<p>Now, let&rsquo;s see what that gets us:</p>
+
+<p><img src="http://i.imgur.com/8r3VaJQ.gif" alt="step 2" /></p>
+
+<p>So we have a Volt task, and the relevent spec. Let&rsquo;s open up the default task file and check it out:</p>
+
+<pre><code class="RUBY">class StatTask &lt; Volt::Task
+
+end
+</code></pre>
+
+<p>Now, lets add some code to get information from the backend using this task we have generated. Volt tasks exclusively run
+asynchronously on the backend.</p>
+
+<pre><code class="RUBY">...
+  def show_stats
+    {
+      ruby_version:     RUBY_VERSION, # note that these are constants always available in Ruby
+      ruby_description: RUBY_DESCRIPTION,
+      ruby_platform:    RUBY_PLATFORM
+    }
+  end
+...
+</code></pre>
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/stat_task.rb#L2">Source</a></h5>
+
+<p>Now, this method is an instance level method. However, to call it in our controller Volt has a slightly different convention
+than the norm when it comes to invoking this. It is also worth noting that even though we are writing it as a Ruby hash, it
+will be coerced into a Volt model on the frontend. This becomes an important detail</p>
+
+<p>If we navigate to our controller, we can begin to handle the output from this.</p>
+
+<pre><code class="RUBY">module Main
+  class MainController &lt; Volt::ModelController
+    def index
+      StatTask.show_stats
+      .then do |stats|
+        page._info = stats
+      end.fail do |error|
+        page._info = error
+      end
+    ...
+   end
+end
+</code></pre>
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
+
+<p>Now if we go to our client code in <code>app/main/views/main/index.html</code>, we have created a <code>page._info</code> Volt model we can access these parameters from. Not that is is accessed with a <code>_</code> prepended. This is another Volt convention.</p>
+
+<pre><code class="RUBY">...
+  &lt;h2&gt;Ruby Description&lt;/h2&gt;
+    
+  &lt;h2&gt;Ruby Version&lt;/h2&gt;
+    
+  &lt;h2&gt;Ruby Platform&lt;/h2&gt;
+    
+ ...
+</code></pre>
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
+
+<h2>Going Further</h2>
+
+<p>Let&rsquo;s say we had a simple API we could hit and wanted to grab some data. As an example, I have created <a href="https://quiet-temple-1623.herokuapp.com/frontpage/1">this</a>.
+It is a simple wrapper for <a href="http://lobste.rs">Lobste.rs</a> that returns some JSON of the top stories in a <code>results</code>
+key. Using another Task we can mirror the frontpage of the site hitting this API. First, we need to add Mechanize
+to our Gemfile to easily get web responses.</p>
+
+<pre><code class="RUBY">...
+gem 'mechanize'
+...
+</code></pre>
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/Gemfile#L31">Source</a></h5>
+
+<p><code>bundle install</code> and we are ready to get going if we generate another task.</p>
+
+<p><code>volt generate task lobsters</code></p>
+
+<p>This will create our task just like last time and we can open it.</p>
+
+<pre><code class="RUBY">require 'json'
+require 'mechanize'
+
+...
+  def lobsters
+    JSON.parse(Mechanize.new.get('https://quiet-temple-1623.herokuapp.com/frontpage/1').content)
+  end
+...
+</code></pre>
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/tasks/lobster_task.rb">Source</a></h5>
+
+<p>Now we just go into our <code>index.html</code> for <code>main</code> and we can add some logic to display our stories.</p>
+
+<pre><code class="RUBY">...
+  
+    &lt;h4&gt;&lt;a href=''&gt;
+    &lt;/a&gt;&lt;/h4&gt;
+  
+...
+</code></pre>
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/views/main/index.html#L7">Source</a></h5>
+
+<p>And match that up with the <code>index</code> method on our controller:</p>
+
+<pre><code class="RUBY">...
+    def index
+      LobstersTask.lobsters
+      .then do |stories|
+        page._stories = stories
+      end.fail do |err|
+        page._stories = err
+      end
+    end
+...
+</code></pre>
+
+<h5><a href="https://github.com/ybur-yug/volt_task_example/blob/master/app/main/controllers/main_controller.rb#L5">Source</a></h5>
+
+<p>And now we&rsquo;ve successfully executed code on only the server, and fed it to the client once the task was completed
+communicating both with 3rd party API&rsquo;s and our own server.</p>
+
+<h5><a href="http://young-harbor-8245.herokuapp.com/">Here</a> is a deployed version of the final app.</h5>
+
+<p>Happy Hacking.</p>
 ]]></content>
   </entry>
   
